@@ -1,7 +1,11 @@
 package main
 
 import (
+	"fmt"
+	"time"
+
 	"github.com/mt1976/frantic-core/logHandler"
+	"github.com/mt1976/frantic-fin/banking/calendarmath"
 	"github.com/mt1976/frantic-fin/financial"
 )
 
@@ -40,4 +44,27 @@ func main() {
 			logHandler.InfoLogger.Printf("✅ '%s' → %s (amount string)\n", ex, val4)
 		}
 	}
+
+	start := time.Date(2025, 5, 20, 0, 0, 0, 0, time.UTC)
+
+	holidays := []time.Time{
+		time.Date(2025, 12, 25, 0, 0, 0, 0, time.UTC), // Christmas
+	}
+
+	opts := calendarmath.Options{
+		Months:            1,
+		Days:              1,
+		BusinessDayOffset: 2,
+		AdjustToBusiness:  true,
+		Holidays:          holidays,
+		Direction:         calendarmath.Forward,
+	}
+
+	result, err := calendarmath.AddCalendarBusinessDays(start, opts)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println("Final Result:", result.Format("2006-01-02 (Mon)"))
+
 }
