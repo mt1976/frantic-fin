@@ -27,5 +27,7 @@ require (
 	github.com/BurntSushi/toml v1.4.0 // indirect
 	github.com/leekchan/accounting v1.0.0
 	github.com/mt1976/frantic-core v1.2.71
+	github.com/rickar/cal/v2 v2.1.23
+	github.com/scmhub/calendar v0.0.0-20250305134741-bdfe49f3f914
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 )

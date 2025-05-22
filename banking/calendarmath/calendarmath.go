@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"time"
 
-	datecalc "github.com/markusmobius/go-dateparser"
+	"github.com/scmhub/calendar"
 )
 
-// Direction represents forward or backward calendar math
+// Direction for date math
 type Direction int
 
 const (
@@ -15,53 +15,46 @@ const (
 	Backward Direction = -1
 )
 
-// Options controls how the date math is applied
+// Options defines how the date calculation works
 type Options struct {
-	Months            int
-	Days              int
-	BusinessDayOffset int         // e.g., 2 = +2 business days, -1 = back 1 business day
-	AdjustToBusiness  bool        // If true, adjusts final date to nearest business day
-	Holidays          []time.Time // Holiday list
-	Direction         Direction   // Forward or Backward
+	Months            int                // calendar months to add/subtract
+	Days              int                // calendar days to add/subtract
+	BusinessDayOffset int                // business-day offset after calendar math
+	AdjustToBusiness  bool               // snap final date to workday if off
+	Direction         Direction          // forward or backward
+	ExchangeCalendar  *calendar.Calendar // e.g. NYSE, LSE, etc.
 }
 
-// AddCalendarBusinessDays performs calendar math + business day offset and adjustment
-func AddCalendarBusinessDays(start time.Time, opts Options) (time.Time, error) {
-	// Step 1: Calendar math
-	months := opts.Months * int(opts.Direction)
-	days := opts.Days * int(opts.Direction)
-	result := start.AddDate(0, months, days)
+// GetNextWorkingDay computes next working day
+func GetNextWorkingDay(start time.Time) (time.Time, error) {
+	// Apply calendar math
 
-	// Step 2: Set up calendar
-	cal := datecalc.NewCalendar()
-	cal.AddWeekend(time.Saturday)
-	cal.AddWeekend(time.Sunday)
+	// Default to NYSE if no calendar provided
 
-	for _, h := range opts.Holidays {
-		cal.AddHoliday(h)
+	cal2 := calendar.NewCalendar("test", time.Local, time.Now().Year())
+
+	nbd := cal2.NextBusinessDay(start)
+
+	return nbd, nil
+}
+
+// GetPreviousWorkingDay computes the prvious working day
+func GetPreviousWorkingDay(start time.Time) (time.Time, error) {
+	cal2 := calendar.NewCalendar("test", time.Local, time.Now().Year())
+	upd := start.AddDate(0, 0, -2)
+	pbd := cal2.NextBusinessDay(upd)
+	if pbd.IsZero() {
+		return time.Time{}, fmt.Errorf("no previous business day found")
 	}
+	return pbd, nil
+}
 
-	// Step 3: Apply business day offset
-	if opts.BusinessDayOffset != 0 {
-		var err error
-		result, err = cal.AddBusinessDays(result, opts.BusinessDayOffset)
-		if err != nil {
-			return time.Time{}, fmt.Errorf("failed to add business days: %w", err)
-		}
+// IsWorkingDay checks if the date is a working day
+func IsWorkingDay(date time.Time) (bool, error) {
+	cal2 := calendar.NewCalendar("test", time.Local, time.Now().Year())
+	wd := cal2.IsBusinessDay(date)
+	if wd {
+		return true, nil
 	}
-
-	// Step 4: Adjust final date to business day if requested
-	if opts.AdjustToBusiness && !cal.IsBusinessDay(result) {
-		var err error
-		if opts.Direction == Forward {
-			result, err = cal.NextBusinessDay(result)
-		} else {
-			result, err = cal.PreviousBusinessDay(result)
-		}
-		if err != nil {
-			return time.Time{}, fmt.Errorf("failed to adjust to business day: %w", err)
-		}
-	}
-
-	return result, nil
+	return false, fmt.Errorf("not a working day")
 }

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/mt1976/frantic-core/logHandler"
@@ -45,26 +44,16 @@ func main() {
 		}
 	}
 
-	start := time.Date(2025, 5, 20, 0, 0, 0, 0, time.UTC)
-
-	holidays := []time.Time{
-		time.Date(2025, 12, 25, 0, 0, 0, 0, time.UTC), // Christmas
+	for i := 0; i < 15; i++ {
+		pivot := time.Now().Add(time.Duration(i) * (time.Hour * 24))
+		logHandler.InfoLogger.Printf("Pivot: %s\n", pivot.Format(time.DateOnly))
+		NextBusinessDay, _ := calendarmath.GetNextWorkingDay(pivot)
+		logHandler.InfoLogger.Printf("Next Business Day: %s\n", NextBusinessDay.Format(time.DateOnly))
+		PreviousBusinessDay, _ := calendarmath.GetPreviousWorkingDay(pivot)
+		logHandler.InfoLogger.Printf("Previous Business Day: %s\n", PreviousBusinessDay.Format(time.DateOnly))
+		IsWorkingDay, _ := calendarmath.IsWorkingDay(pivot)
+		logHandler.InfoLogger.Printf("Is Working Day: %t\n", IsWorkingDay)
+		logHandler.InfoLogger.Printf("--------------------------------------------------\n")
 	}
-
-	opts := calendarmath.Options{
-		Months:            1,
-		Days:              1,
-		BusinessDayOffset: 2,
-		AdjustToBusiness:  true,
-		Holidays:          holidays,
-		Direction:         calendarmath.Forward,
-	}
-
-	result, err := calendarmath.AddCalendarBusinessDays(start, opts)
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println("Final Result:", result.Format("2006-01-02 (Mon)"))
 
 }
