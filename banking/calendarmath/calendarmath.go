@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/goforj/godump"
 	"github.com/scmhub/calendar"
 )
 
@@ -31,9 +32,11 @@ func GetNextWorkingDay(start time.Time) (time.Time, error) {
 
 	// Default to NYSE if no calendar provided
 
-	cal2 := calendar.NewCalendar("test", time.Local, time.Now().Year())
+	cal2 := calendar.NewCalendar("test", time.Local, time.Now().Year()-1)
 
 	nbd := cal2.NextBusinessDay(start)
+
+	godump.Dump(*cal2)
 
 	return nbd, nil
 }

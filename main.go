@@ -3,6 +3,7 @@ package main
 import (
 	"time"
 
+	"github.com/goforj/godump"
 	"github.com/mt1976/frantic-core/logHandler"
 	"github.com/mt1976/frantic-fin/banking/calendarmath"
 	"github.com/mt1976/frantic-fin/financial"
@@ -55,5 +56,8 @@ func main() {
 		logHandler.InfoLogger.Printf("Is Working Day: %t\n", IsWorkingDay)
 		logHandler.InfoLogger.Printf("--------------------------------------------------\n")
 	}
+
+	godump.Dump(examples)
+	godump.Dd(examples)
 
 }
